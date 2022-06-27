@@ -1,0 +1,60 @@
+package com.steps;
+
+import com.baselibrary.Baseclass;
+import com.config.enums.Browsers;
+import com.dataproviderUtilities.ConfigFileReader;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+
+public class Hooks {
+
+    WebDriver driver;
+    public ConfigFileReader configFileReader;
+
+
+    public Hooks() {
+        driver = Baseclass.selectBrowser(Browsers.CHROME.name());
+        configFileReader = new ConfigFileReader();
+
+    }
+
+    @Before
+    public void beforeScenario(Scenario scenario) {
+        scenario.log("--Starting the Execution--");
+        scenario.log("Scenario --> "+ scenario.getName());
+
+
+    }
+
+    @After(order = 1)
+    public void afterScenario(Scenario scenario) {
+        try {
+            String screenshotName = scenario.getName().replaceAll(" ", "_");
+            if (scenario.isFailed()) {
+                scenario.log("this is my failure message");
+                TakesScreenshot ts = (TakesScreenshot) driver;
+                byte[] screenshot = ts.getScreenshotAs(OutputType.BYTES);
+                scenario.attach(screenshot, "image/png", screenshotName);
+
+            }
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+    @After(order = 0)
+    public void quitBrowser(Scenario scenario) {
+        driver.quit();
+        scenario.log("---Closing the Browser---");
+
+    }
+
+}
